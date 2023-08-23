@@ -1,6 +1,7 @@
 package com.example.alarm
 
 import android.annotation.SuppressLint
+import android.Manifest
 import android.app.Activity
 import android.app.AlarmManager
 import android.app.NotificationChannel
@@ -12,6 +13,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.example.alarm.databinding.ActivityMainBinding
@@ -28,6 +30,16 @@ class MainActivity : AppCompatActivity() {
     private val PICK_IMAGE_REQUEST = 5
     private lateinit var selectedImageUri: Uri
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            loadImageAndSetToImageView()
+        } else {
+            Toast.makeText(this@MainActivity, "Permission denied", Toast.LENGTH_LONG).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView<ActivityMainBinding>(this,R.layout.activity_main)
@@ -37,8 +49,8 @@ class MainActivity : AppCompatActivity() {
             oldTodo = intent.getSerializableExtra("current_todo") as Todo
             binding.etTitle.setText(oldTodo.title)
             binding.etNote.setText(oldTodo.note)
-//            binding.shapeImg.setImageURI(oldTodo.image)
             isUpdate = true
+            requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
         }catch (e: Exception){
             e.printStackTrace()
         }
@@ -51,7 +63,10 @@ class MainActivity : AppCompatActivity() {
             openImagePicker()
         }
     }
-
+    private fun loadImageAndSetToImageView() {
+        val imageUri = Uri.parse(oldTodo.image)
+        binding.shapeImg.setImageURI(imageUri)
+    }
     private fun openImagePicker() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
@@ -64,7 +79,6 @@ class MainActivity : AppCompatActivity() {
             binding.shapeImg.setImageURI(selectedImageUri)
         }
     }
-
     @SuppressLint("ScheduleExactAlarm")
     private fun scheduleNotification() {
         val title = binding.etTitle.text.toString()
@@ -127,7 +141,6 @@ class MainActivity : AppCompatActivity() {
         val min = binding.timePicker.minute
         val hr = binding.timePicker.hour
         Log.d("getTime", "Hour: $hr, Minute: $min")
-
         val calendar = Calendar.getInstance()
 
         try {

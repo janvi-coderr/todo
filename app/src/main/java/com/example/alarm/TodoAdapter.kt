@@ -12,6 +12,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
+import com.google.android.material.imageview.ShapeableImageView
 
 class TodoAdapter(private val context: Context, val listener: TodoClickListener):
     RecyclerView.Adapter<TodoAdapter.TodoViewHolder>(){
@@ -33,12 +34,14 @@ class TodoAdapter(private val context: Context, val listener: TodoClickListener)
 
         Glide.with(context)
             .load(imageUri)
+//            .into(holder.imageView)
             .into(object : SimpleTarget<Drawable>() {
                 override fun onResourceReady(
                     resource: Drawable,
                     transition: com.bumptech.glide.request.transition.Transition<in Drawable>?
                 ) {
                     holder.imageView?.setImageDrawable(resource)
+                    holder.imageView2?.setImageDrawable(resource)
                 }
             })
 
@@ -65,6 +68,7 @@ class TodoAdapter(private val context: Context, val listener: TodoClickListener)
         val note = itemView.findViewById<TextView>(R.id.tvNote)
         val title = itemView.findViewById<TextView>(R.id.tvTitle)
         val imageView = itemView.findViewById<ImageView>(R.id.ivImg)
+        val imageView2 = itemView.findViewById<ShapeableImageView>(R.id.shapeImg)
     }
 
     interface TodoClickListener {
