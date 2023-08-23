@@ -1,6 +1,7 @@
 package com.example.alarm
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.SimpleTarget
 
 class TodoAdapter(private val context: Context, val listener: TodoClickListener):
     RecyclerView.Adapter<TodoAdapter.TodoViewHolder>(){
@@ -23,10 +26,22 @@ class TodoAdapter(private val context: Context, val listener: TodoClickListener)
 
     override fun onBindViewHolder(holder: TodoAdapter.TodoViewHolder, position: Int) {
         val item = todoList[position]
-        val imageUri = Uri.parse(item.image)
         holder.note.text = item.note
         holder.title.text = item.title
-        holder.imageView?.setImageURI(imageUri)
+
+        val imageUri = Uri.parse(item.image)
+
+        Glide.with(context)
+            .load(imageUri)
+            .into(object : SimpleTarget<Drawable>() {
+                override fun onResourceReady(
+                    resource: Drawable,
+                    transition: com.bumptech.glide.request.transition.Transition<in Drawable>?
+                ) {
+                    holder.imageView?.setImageDrawable(resource)
+                }
+            })
+
         holder.todo_layout.setOnClickListener {
             listener.onItemClicked(todoList[holder.adapterPosition])
         }

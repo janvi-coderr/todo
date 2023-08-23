@@ -37,7 +37,6 @@ class HomeActivity : AppCompatActivity(), TodoAdapter.TodoClickListener  {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView<ActivityHomeBinding>(this, R.layout.activity_home)
 
-
         val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
         itemTouchHelper.attachToRecyclerView(binding.recycleView)
 
@@ -89,7 +88,6 @@ class HomeActivity : AppCompatActivity(), TodoAdapter.TodoClickListener  {
                 }
             }
         }
-
 
     override fun onItemClicked(todo: Todo) {
         val intent = Intent(this, MainActivity::class.java)

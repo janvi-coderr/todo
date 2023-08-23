@@ -3,29 +3,18 @@ package com.example.alarm
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlarmManager
-import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.format.DateFormat.getTimeFormat
-import android.view.View
+import android.util.Log
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModel
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
 import com.example.alarm.databinding.ActivityMainBinding
-import com.example.todoalarm.presentation.screens.viewmodel.TodoViewModel
-import com.google.android.gms.cast.framework.media.ImagePicker
-import com.google.android.material.imageview.ShapeableImageView
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -48,6 +37,7 @@ class MainActivity : AppCompatActivity() {
             oldTodo = intent.getSerializableExtra("current_todo") as Todo
             binding.etTitle.setText(oldTodo.title)
             binding.etNote.setText(oldTodo.note)
+//            binding.shapeImg.setImageURI(oldTodo.image)
             isUpdate = true
         }catch (e: Exception){
             e.printStackTrace()
@@ -80,10 +70,15 @@ class MainActivity : AppCompatActivity() {
         val title = binding.etTitle.text.toString()
         val intent = Intent(applicationContext, Notification::class.java)
         val message = binding.etNote.text.toString()
+
         intent.putExtra(titleExtra, title)
         intent.putExtra(messageExtra, message)
 
         if(title.isNotEmpty() && message.isNotEmpty()){
+            if (!::selectedImageUri.isInitialized) {
+                Toast.makeText(this@MainActivity, "Please select an image", Toast.LENGTH_LONG).show()
+                return
+            }
             val formatter = SimpleDateFormat("EEE, d MMM yyyy HH:mm a")
             val pendingIntent = PendingIntent.getBroadcast(
                 applicationContext,
@@ -98,7 +93,6 @@ class MainActivity : AppCompatActivity() {
                 time,
                 pendingIntent
             )
-            showAlart(time, title, message)
 
             if (isUpdate) {
                 todo = Todo(
@@ -129,23 +123,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showAlart(time: Long, title: String, message: String) {
-        val date = Date(time)
-        val timeformat = getTimeFormat(applicationContext)
-
-        AlertDialog.Builder(this)
-            .setTitle("Notification")
-            .setMessage("Title: " + title + "\nMessage: " + message + "\nAt" + timeformat.format(date))
-            .setPositiveButton("Okay"){_,_->}
-            .show()
-    }
-
     private fun getTime(): Long {
-        val min =  binding.timePicker.minute
-        val hr =  binding.timePicker.hour
+        val min = binding.timePicker.minute
+        val hr = binding.timePicker.hour
+        Log.d("getTime", "Hour: $hr, Minute: $min")
 
         val calendar = Calendar.getInstance()
-        calendar.set(hr, min)
+
+        try {
+            calendar.set(Calendar.HOUR_OF_DAY, hr)
+            calendar.set(Calendar.MINUTE, min)
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            Log.e("getTime", "ArrayIndexOutOfBoundsException: ${e.message}")
+        }
+
         return calendar.timeInMillis
     }
 
